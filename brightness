@@ -1,0 +1,121 @@
+#!/bin/bash
+
+SNAME=`basename $0`
+STEP=0.1
+MONNAME=`xrandr | grep  -w primary | awk '{print $1}'`
+OPER=0
+
+function checkflag {
+        if [ "${1:0:1}" = "-" ] ; then
+                echo "Error: Missing Argument after a flag!"
+                quit
+        fi
+}
+
+function help {
+	echo "This script changes the brightness of the screen without changing the backlight."
+	echo "Correct usage:  $SNAME [OPTIONS]"
+	echo "To increase brightness:                       $SNAME -u"
+	echo "To decrease brightness:                       $SNAME -d"
+	echo "To set brightness to default value:           $SNAME -m"  
+	echo "To directly adjust backlight brightness:      $SNAME -n <NUM> (0-2 in decimals, eg. 0.8)"
+	echo "To show connected displays:                   $SNAME -s"
+	echo "To set display to be adjusted:                $SNAME -D <displayname> "
+	echo "To display help                               $SNAME -h or $SNAME --help"
+	echo ""
+	echo "Default display is primary display! You don't need to use -D flag if you want to change the brightness settings of primary display."
+}
+
+function quit {
+	rm -f tmp
+	exit 0
+}
+
+if [ -z "$1" ] ; then
+        help
+	quit
+fi
+
+while test $# -gt 0; do
+	case "$1" in
+		--h|--help)
+                	help
+                	quit
+                	;;
+		-s) 
+			echo "$MONNUM displays are connected:"
+			MONNUM=$(xrandr | grep -w connected | awk '{print $1}' | wc -w)
+			xrandr | grep -w connected | awk '{print $1}' > tmp
+			while read p ; do
+				echo "Display: $p"
+				val=`xrandr --verbose | grep -A 10 -w connected | grep -A 10 -w $p | grep -i brightness`
+				echo "$val"
+			done < tmp
+			quit
+			;;
+		-D)
+			shift
+			checkflag $1
+			xrandr | grep -w connected | awk '{print $1}' > tmp
+			tMN=`grep $1 tmp`
+			if [ -z $tMN ] ; then
+				echo "Wrong display name, or wrong usage, try -s option to see the connected displays or -h option to display help"
+				quit
+			else
+				MONNAME=$1
+				shift
+			fi
+			;;
+		-u)
+			OPER=1
+			break
+			;;
+		-d)
+			OPER=2
+			break
+			;;
+		-m)
+			OPER=0
+			break
+			;;
+		-n)
+			shift
+			if (( $(echo "$1 >= 2.0" | bc -l ) )) ; then
+				bri=2.0
+			elif (( $(echo "$1 <= 0.0" | bc -l) )) ; then
+				bri=0.0
+			else
+				bri=$1
+			fi
+			shift
+			OPER=3
+			break
+			;;
+
+		*)
+			echo "ERROR: Wrong use"
+			help
+			quit
+			;;
+	esac	
+done
+
+CURRENT=$(xrandr --verbose | grep -A 10 -w connected  | grep -w -A 10 $MONNAME | grep -i brightness | awk -F' ' '{ print $2 }' ) 
+
+if [ $OPER -eq 0 ] ; then
+	xrandr --output $MONNAME --brightness 1
+elif [ $OPER -eq 1 ] ; then
+	bri=$(echo "$CURRENT + $STEP" | bc -l)
+	xrandr --output $MONNAME --brightness $bri
+elif [ $OPER -eq 2 ] ; then
+	bri=$(echo "$CURRENT - $STEP" | bc -l)
+	xrandr --output $MONNAME --brightness $bri
+elif [ $OPER -eq 3 ] ; then
+	xrandr --output $MONNAME --brightness $bri
+else
+	echo "ERROR: check the code"
+
+fi
+
+quit
+
