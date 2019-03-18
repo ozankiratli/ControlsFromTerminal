@@ -23,11 +23,18 @@ function checkvol {
 
 function getcurrent {
 	current=`pactl list | grep RUNNING -B 1 -A 10 | grep "Sink #$1" -A 10 | grep 'Sink\|Volume' | sed  -n -E 's/(^|.*[^0-9])([0-9]{1,3})%.*/\2/p'`
+	if [ -z $current ] ; then
+		current=`pactl list | grep SUSPENDED -B 1 -A 10 | grep "Sink #$1" -A 10 | grep 'Sink\|Volume' | sed  -n -E 's/(^|.*[^0-9])([0-9]{1,3})%.*/\2/p'`
+	fi
+
 }
 
 function getsinks {
 	sinks=`pactl list | grep RUNNING -B 1 | grep -oP 'Sink #\K([0-9]+)'`
-	numsinks=`pactl list | grep RUNNING -B 1 | grep -oP 'Sink #\K([0-9]+)' | wc -w`
+	if [ -z $sinks ] ; then
+		sinks=`pactl list | grep 'RUNNING\|SUSPENDED' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
+	fi
+	numsinks=`echo $sinks | wc -w`
 }
 
 function help {
