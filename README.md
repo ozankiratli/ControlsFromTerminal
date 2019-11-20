@@ -72,4 +72,18 @@ Default display is primary display! You don't need to use -D flag if you want to
 The script is tested with Dell 9560, Ubuntu 18.04 and i3wm.
 
 ## VOLUME
+This script detects and controls the sound on the active sink instead of "Master" or a given sink. 
+
+***Unimportant note:*** The reason to code this was that I've had experiences where I had problems controlling the sound using the scripts and programs available. 
+
+ ### Usage
+Correct usage:  volume [OPTIONS]
+ 
+- If you want to change the sink use '-s <sink>' before 'u' or 'd' 
+- To increase volume:             volume u
+- To decrease volume:             volume d
+- To directly adjust volume:      volume <NUM> (1-100 or 1-LEVELS according to your configuration)
+- To mute:                        volume mute
+- To select sink:                 volume -s <sink> (Default: @DEFAULT_SINK@)
+- To display help:                volume -h or  --help
 
