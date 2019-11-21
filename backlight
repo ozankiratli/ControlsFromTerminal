@@ -1,8 +1,13 @@
 #!/bin/bash
 
+signalvol=`pkill -RTMIN+10 i3blocks`
 PATHTOLIGHT=`grep "PATH" /usr/local/bin/backlightconfig | awk '{print $2}'`
 numoflevels=`grep "LEVELS" /usr/local/bin/backlightconfig | awk '{print $2}'`
-brightness=`cat $PATHTOLIGHT/brightness`
+brightness=`cat ~/.lastbacklight 2>/dev/null`
+if [ -z $brightness ] ; then
+	brightness=`cat $PATHTOLIGHT/brightness`
+	cat $PATHTOLIGHT/brightness > ~/.lastbacklight
+fi
 max=`cat $PATHTOLIGHT/max_brightness`
 
 sname=`basename $0`
@@ -10,6 +15,7 @@ sname=`basename $0`
 #Comment this out to use the global setting
 numofulevels=100
 #numofulevels=$numoflevels
+
 
 incrsize=$(( $max/$numoflevels ))
 incrusize=$(( $max/$numofulevels ))
@@ -21,6 +27,7 @@ bri=$brightness
 
 function adjustbrightness {
 	echo $1 > $PATHTOLIGHT/brightness
+	cat $PATHTOLIGHT/brightness > ~/.lastbacklight
 	exit 0	
 }
 
@@ -34,8 +41,12 @@ function help {
 	echo "To display help                               $sname -h or $name --help"
 }
 
+function init {
+	cat 
+}
 
 if [ -z $1 ] ; then
+	cat ~/.lastbacklight > $PATHTOLIGHT/brightness
 	echo "Actual brightness:"
 	echo "$brightness"
 	echo ""
@@ -93,3 +104,4 @@ else
 			;;
 	esac
 fi
+

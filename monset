@@ -1,0 +1,62 @@
+#!/bin/bash
+
+PCRes=3840x2160
+HomeLeftRes=1920x1200
+HomeRightRes=1920x1080
+OfficeRes=1680x1050
+
+
+case $1 in
+    home|Home|HOME)
+	xrandr --auto
+	wait
+	xrandr --output eDP-1 --primary --preferred  --mode $PCRes --pos 0x2400
+	wait
+	xrandr --output DP-2-8 --mode $HomeLeftRes --scale 2x2 --pos 0x0 --panning 3840x2400+0+0
+	wait
+	xrandr --output HDMI-1 --mode $HomeRightRes --scale 2x2 --pos 3840x240 --panning 3840x2160+3840+240
+	wait
+	;;
+    home2|Home2|HOME2)
+	xrandr --auto
+	wait
+	xrandr --output eDP-1 --primary --mode $PCRes --pos 0x2400
+	wait
+	xrandr --output DP-1-8 --mode $HomeLeftRes --panning 3840x2400+0+0 --pos 0x0 --scale 2x2
+	wait
+	;;
+    office|Office|OFFICE)
+	xrandr --auto
+	wait
+	xrandr --output eDP-1 --primary --mode $PCRes --pos 0x0  
+	wait
+	xrandr --output HDMI-1 --mode $OfficeRes --pos 3840x0 --scale 2x2
+	;;
+    officeV|OfficeV|OFFICEV)
+	xrandr --auto
+	wait
+	xrandr --output eDP-1 --primary --mode $PCRes --pos 0x0 
+	wait
+	xrandr --output HDMI-1 --rotate left --mode $OfficeRes --pos 3840x0  --scale 2x2
+	wait
+	;;
+    auto|Auto|AUTO)
+	xrandr --auto
+	wait
+	xrandr --output eDP-1 --primary  --mode $PCRes
+	;;
+    *)
+	echo "Auto"
+	xrandr --auto 
+	;;
+esac
+
+xset +dpms
+xset s noblank
+xset s noexpose
+xset s off
+xset dpms 0 0 0 
+xset dpms force off
+sleep 2s
+xset dpms force on
+sleep 2s
