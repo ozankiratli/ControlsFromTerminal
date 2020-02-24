@@ -3,7 +3,7 @@
 signalvol=`pkill -RTMIN+10 i3blocks`
 PATHTOLIGHT=`grep "PATH" ~/.config/cftconf/backlight/backlight.conf | awk '{print $2}'`
 numoflevels=`grep "LEVELS" ~/.config/cftconf/backlight/backlight.conf | awk '{print $2}'`
-LASTBL="~/config/cftconf/backlight/.lastbacklight"
+LASTBL=~/.config/cftconf/backlight/.lastbacklight
 
 brightness=`cat $LASTBL 2>/dev/null`
 if [ -z $brightness ] ; then
