@@ -30,6 +30,7 @@ bri=$brightness
 function adjustbrightness {
 	echo $1 > $PATHTOLIGHT/brightness
 	cat $PATHTOLIGHT/brightness > $LASTBL
+	signalvol=`pkill -RTMIN+10 i3blocks`
 	exit 0	
 }
 
