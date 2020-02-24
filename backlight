@@ -1,12 +1,14 @@
 #!/bin/bash
 
 signalvol=`pkill -RTMIN+10 i3blocks`
-PATHTOLIGHT=`grep "PATH" /usr/local/bin/backlightconfig | awk '{print $2}'`
-numoflevels=`grep "LEVELS" /usr/local/bin/backlightconfig | awk '{print $2}'`
-brightness=`cat ~/.lastbacklight 2>/dev/null`
+PATHTOLIGHT=`grep "PATH" ~/.config/cftconf/backlight/backlight.conf | awk '{print $2}'`
+numoflevels=`grep "LEVELS" ~/.config/cftconf/backlight/backlight.conf | awk '{print $2}'`
+LASTBL="~/config/cftconf/backlight/.lastbacklight"
+
+brightness=`cat $LASTBL 2>/dev/null`
 if [ -z $brightness ] ; then
 	brightness=`cat $PATHTOLIGHT/brightness`
-	cat $PATHTOLIGHT/brightness > ~/.lastbacklight
+	cat $PATHTOLIGHT/brightness > $LASTBL
 fi
 max=`cat $PATHTOLIGHT/max_brightness`
 
@@ -27,7 +29,7 @@ bri=$brightness
 
 function adjustbrightness {
 	echo $1 > $PATHTOLIGHT/brightness
-	cat $PATHTOLIGHT/brightness > ~/.lastbacklight
+	cat $PATHTOLIGHT/brightness > $LASTBL
 	exit 0	
 }
 
@@ -41,12 +43,9 @@ function help {
 	echo "To display help                               $sname -h or $name --help"
 }
 
-function init {
-	cat 
-}
 
 if [ -z $1 ] ; then
-	cat ~/.lastbacklight > $PATHTOLIGHT/brightness
+	cat $LASTBL > $PATHTOLIGHT/brightness
 	echo "Actual brightness:"
 	echo "$brightness"
 	echo ""

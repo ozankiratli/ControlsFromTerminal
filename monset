@@ -1,62 +1,79 @@
 #!/bin/bash
 
-PCRes=3840x2160
-HomeLeftRes=1920x1200
-HomeRightRes=1920x1080
-OfficeRes=1680x1050
+CONNECTEDF=~/.config/cftconf/monset/CONNECTED
+MONITORSF=~/.config/cftconf/monset/MONITORS
+MONITORCONFIGF=~/.config/cftconf/monset/MONITORCONFIG
+
+function findconnected {
+  CONNECTEDMONITORS=`xrandr --prop | grep -w "connected" | awk '{print $1}'`
+  rm $CONNECTEDF
+  touch $CONNECTEDF
+  for mon in $CONNECTEDMONITORS ; do
+    EDID=`xrandr --prop |  grep $mon -A 30 | grep EDID -A 8 | tail -8 | head -1 | grep -o "[A-Za-z0-9]*"`
+    echo "$mon $EDID" >> $CONNECTEDF
+  done
+}
+
+function connectedMonitors { 
+  EDIDs=`awk '{print $2}' $CONNECTEDF`
+  for edid in $EDIDs ; do
+    MON1=`grep $edid $MONITORSF | awk '{print $1}'` 
+    MON2=`grep $edid $CONNECTEDF` 
+    echo "$MON1 $MON2" >> ~/tmp 
+  done
+  mv ~/tmp $CONNECTEDF
+}
+
+findconnected
+connectedMonitors
 
 
-case $1 in
-    home|Home|HOME)
-	xrandr --auto
-	wait
-	xrandr --output eDP-1 --primary --preferred  --mode $PCRes --pos 0x2400
-	wait
-	xrandr --output DP-2-8 --mode $HomeLeftRes --scale 2x2 --pos 0x0 --panning 3840x2400+0+0
-	wait
-	xrandr --output HDMI-1 --mode $HomeRightRes --scale 2x2 --pos 3840x240 --panning 3840x2160+3840+240
-	wait
-	;;
-    home2|Home2|HOME2)
-	xrandr --auto
-	wait
-	xrandr --output eDP-1 --primary --mode $PCRes --pos 0x2400
-	wait
-	xrandr --output DP-1-8 --mode $HomeLeftRes --panning 3840x2400+0+0 --pos 0x0 --scale 2x2
-	wait
-	;;
-    office|Office|OFFICE)
-	xrandr --auto
-	wait
-	xrandr --output eDP-1 --primary --mode $PCRes --pos 0x0  
-	wait
-	xrandr --output HDMI-1 --mode $OfficeRes --pos 3840x0 --scale 2x2
-	;;
-    officeV|OfficeV|OFFICEV)
-	xrandr --auto
-	wait
-	xrandr --output eDP-1 --primary --mode $PCRes --pos 0x0 
-	wait
-	xrandr --output HDMI-1 --rotate left --mode $OfficeRes --pos 3840x0  --scale 2x2
-	wait
-	;;
-    auto|Auto|AUTO)
-	xrandr --auto
-	wait
-	xrandr --output eDP-1 --primary  --mode $PCRes
-	;;
-    *)
-	echo "Auto"
-	xrandr --auto 
-	;;
+if [ -z $1 ] ; then
+  selection="auto"
+else
+  selection=`echo $1 | awk '{print tolower($0)}'`
+  selection=`grep -w -o -i $selection $MONITORCONFIGF`
+  if [ -z $selection ] ; then
+    selection="auto"
+  fi
+fi
+
+case $selection in
+  auto)
+    echo "Set to auto"
+    xrandr --auto
+    wait
+    ;;
+  -r|restart)
+    xset dpms force off
+    sleep 1s
+    xset dpms force on
+    sleep 1s
+    ;;
+  *)
+    MONITORS=`awk '{print $1}' $CONNECTEDF` 
+    XRANDR_ALL=""
+    for mon in $MONITORS ; do
+      OUTPUT=`grep $mon $CONNECTEDF | awk '{print"--output "$2}'`
+      STRvar=`cat $MONITORCONFIGF | grep -w "$selection" -A 1000 | grep -E -m1 "}" -B 100 | grep -w "$mon" -A 100 | grep -E -m1 "]" -B 100 | grep var | sed 's/:/ /' | awk '{print"--"$2}'`
+      STRres=`cat $MONITORCONFIGF | grep -w "$selection" -A 1000 | grep -E -m1 "}" -B 100 | grep -w "$mon" -A 100 | grep -E -m1 "]" -B 100 | grep res | sed 's/:/ /' | awk '{print"--mode "$2}'`
+      STRpos=`cat $MONITORCONFIGF | grep -w "$selection" -A 1000 | grep -E -m1 "}" -B 100 | grep -w "$mon" -A 100 | grep -E -m1 "]" -B 100 | grep pos | sed 's/:/ /' | awk '{print"--pos "$2}'`
+      STRrotate=`cat $MONITORCONFIGF | grep -w "$selection" -A 1000 | grep -E -m1 "}" -B 100 | grep -w "$mon" -A 100 | grep -E -m1 "]" -B 100 | grep rotate | sed 's/:/ /' | awk '{print"--rotate "$2}'`
+      STRscale=`cat $MONITORCONFIGF | grep -w "$selection" -A 1000 | grep -E -m1 "}" -B 100 | grep -w "$mon" -A 100 | grep -E -m1 "]" -B 100 | grep scale | sed 's/:/ /' | awk '{print"--scale "$2}'`
+      STRING="$OUTPUT --auto $STRvar $STRrotate $STRres $STRpos $STRscale "
+      XRANDR_ALL="$XRANDR_ALL $STRING"
+    done
+    xrandr $XRANDR_ALL
+    echo "set to $selection"
+    ;;
 esac
+
+
+TouchS=`xinput --list | grep Touchscreen | grep -o "id=[0-9]*" | sed 's/id\=//'`
+xinput --map-to-output $TouchS eDP-1
 
 xset +dpms
 xset s noblank
 xset s noexpose
 xset s off
 xset dpms 0 0 0 
-xset dpms force off
-sleep 2s
-xset dpms force on
-sleep 2s

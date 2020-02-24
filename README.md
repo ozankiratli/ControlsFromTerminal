@@ -3,9 +3,15 @@ This set of bash scripts allows one to control different interfaces through term
 
 There are 3 scripts in this repository, `backlight*` to control your laptop backlight, `brightness` to control your brightness easily through `xrandr`, and `volume` to control and limit your volume through `pulseaudio` (requires `pactl`). Both of the files are coded in bash script, you need `awk`, `grep`, `wc`, and `bc` installed, almost all Linux systems have them installed as default.
 
+## INSTALLING
+1. Copy script files under the directory to use or simply `/usr/local/bin/` (latter requires sudo privileges)
+2. Copy the directories under `.config` into your `.config` directory under home (`/home/$USER/.config/`)
+
+
+
 ## BACKLIGHT
 
-The files, `backlight` and `backlightconfig` are files needed to control your backlight.
+The files, `backlight` and `.config/cftconf/backlight/backlight.conf` are files needed to control your backlight.
 
 ***WARNING!*** To use the script make sure you know the path that controls your backlight.
 
@@ -22,10 +28,7 @@ chmod 666 /sys/class/backlight/intel_backlight/brightness
 @reboot chmod 666 /sys/class/backlight/intel_backlight/brightness
 ```
 
-2. Change the path to the `brightness` file that has the value of backlight level in `backlightconfig`.
-3. Copy the files into `/usr/local/bin` (requires sudo privileges)
-
-
+2. Change the path to the `brightness` file that has the value of backlight level in `backlight.conf`.
 
 
 ### Usage
@@ -74,6 +77,8 @@ The script is tested with Dell 9560, Ubuntu 18.04 and i3wm.
 ## VOLUME
 This script detects and controls the sound on the active sink instead of "Master" or a given sink. 
 
+The files needed are `volume` and `./config/cftconfig/volume/volume.conf`
+
 ***Unimportant note:*** The reason to code this was that I've had experiences where I had problems controlling the sound using the scripts and programs available. 
 
  ### Usage
@@ -86,4 +91,29 @@ Correct usage:  volume [OPTIONS]
 - To mute:                        volume mute
 - To select sink:                 volume -s <sink> (Default: @DEFAULT_SINK@)
 - To display help:                volume -h or  --help
+
+
+## MONSET
+This script is still under development, so it might still have bugs. Please read carefully before using. 
+
+It uses xrandr and is designed to use multiple monitor setups interchangably. 
+
+The files needed are: 
+- Script file: `monset`
+- Monitor list: `.config/cftconf/monset/MONITORS`
+- Monitor configs: `.config/cftconf/monset/MONITORCONFIG`
+
+**IMPORTANT**: Make sure that all monitors and monitor settings have distinct names, it causes problems. (Example: Don't name office monitor `office` and office setting `office` too, change one or the other.)
+
+
+### Adding unsaved monitors to monitor list
+At the moment, the monitors that are being used should be saved manually into the `MONITORS` file. 
+1. Use `xrandr --prop | grep -w "connected" | awk '{print $1}'` to detect which outputs are connected to monitors. The output should give you the outputs with connected monitors. Such as `HDMI-1`
+2. Use the names of those in the following command to get first line of EDID. `xrandr --prop |  grep HDMI-1 -A 30 | grep EDID -A 8 | tail -8 | head -1 | grep -o "[A-Za-z0-9]*"` (Change `HDMI-1` with the connected monitor you get) This should give you something like 
+`00ffffffffffff006258df1213131932`
+3. Add the monitor to your `MONITORS` file with the name of the monitor. `echo "PC-mon 00ffffffffffff006258df1213131932 >> ~/.config/MONITORS` 
+4. Repeat this process for all monitors you have. Make sure that all monitors have separate names.
+
+### Setup file 
+I will add more details but for the time look at sample config files. 
 
