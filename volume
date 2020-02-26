@@ -2,7 +2,7 @@
 
 sinkflag=0
 step=`grep "STEP" ~/.config/cftconf/volume/volume.conf | awk '{print $2}'`
-max=`grep "MAX" ~/.config/cftconfig/volume/volume.conf | awk '{print $2}'`
+max=`grep "MAX" ~/.config/cftconf/volume/volume.conf | awk '{print $2}'`
 sname=`basename $0`
 default_sink="@DEFAULT_SINK@"
 
