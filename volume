@@ -33,8 +33,9 @@ function getcurrent {
 
 function getsinks {
 	sinks=`pactl list | grep RUNNING -B 1 | grep -oP 'Sink #\K([0-9]+)'`
+	allsinks=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
 	if [ -z $sinks ] ; then
-		sinks=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
+		sinks=$allsinks
 	fi
 	numsinks=`echo $sinks | wc -w`
 }
@@ -48,6 +49,7 @@ function help {
 	echo "To directly adjust volume:      $sname <NUM> (1-100 or 1-LEVELS according to your configuration)"
 	echo "To mute:                        $sname mute"
 	echo "To select sink:                 $sname -s <sink> (Default: @DEFAULT_SINK@)"
+	echo "To switch the output:           $sname switchsink"
 	echo "To display help:                $sname -h or $name --help"
 }
 
@@ -68,6 +70,28 @@ function setvol {
         esac
 }
 
+function switchsinks {
+	inputs=`pacmd list-sink-inputs | grep index | awk '{print $2}'`
+	allsinks=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
+	numallsinks=`echo $allsinks | wc -w`
+	actsnk=`pacmd list-sink-inputs | grep sink: | awk '{print $2}'`
+	actsink=`echo $actsnk | awk '{print $1}'`
+	i=0
+	for sink in $allsinks ; do
+	  ALL[$i]=$sink
+	  (( i++ ))
+	done
+	for ((i=0; i<${#ALL[@]}; i++)) ; do
+	  if [ $actsink = ${ALL[$i]} ] ; then
+	    index=$i
+	  fi
+	done
+	newindex=$(( $index + 1 ))
+	newindex=$(( $newindex % $numallsinks ))
+	for input in $inputs ; do
+	  pacmd move-sink-input $input ${ALL[$newindex]}
+	done
+}
 
 getsinks
 
@@ -90,6 +114,9 @@ elif [ "$1" == "mute" ] ; then
 		com="toggle"
        		pactl set-sink-mute "$sink" "$com"
 	done
+	exit 0
+elif [ "$1" == "switchsink" ] ; then
+        switchsinks
 	exit 0
 else
 	while test $# -gt 0; do
