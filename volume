@@ -77,8 +77,8 @@ function switchsinks {
 	actsnk=`pacmd list-sink-inputs | grep sink: | awk '{print $2}'`
 	actsink=`echo $actsnk | awk '{print $1}'`
 	i=0
-	for sink in $allsinks ; do
-	  ALL[$i]=$sink
+	for snk in $allsinks ; do
+	  ALL[$i]=$snk
 	  (( i++ ))
 	done
 	for ((i=0; i<${#ALL[@]}; i++)) ; do
@@ -95,31 +95,37 @@ function switchsinks {
 	signalvol=`pkill -RTMIN+10 i3blocks`
 }
 
-getsinks
 
 if [ -z $1 ] ; then
+	getsinks
 	for sink in $sinks ; do
 		getcurrent $sink
 		echo "Sink #$sink Volume=$current"
 	done
+	signalvol=`pkill -RTMIN+10 i3blocks`
 
 	exit 0
 elif [ "$1" -eq "$1" ] 2>/dev/null ; then
+	getsinks
        	for sink in $sinks ; do
 		vol=$1
 		getcurrent $sink
                 checkvol $vol
                 adjustvol $sink $delim
 	done
+	signalvol=`pkill -RTMIN+10 i3blocks`
 	exit 0
 elif [ "$1" == "mute" ] ; then
+	getsinks
 	for sink in $sinks ; do
 		com="toggle"
        		pactl set-sink-mute "$sink" "$com"
 	done
+	signalvol=`pkill -RTMIN+10 i3blocks`
 	exit 0
 elif [ "$1" == "switchsink" ] ; then
         switchsinks
+	signalvol=`pkill -RTMIN+10 i3blocks`
 	exit 0
 else
 	while test $# -gt 0; do
@@ -158,10 +164,13 @@ fi
 
 
 if [ $sinkflag -eq 1 ] ; then
+	getsinks
 	getcurrent $sink
 	setvol $OPER $current $step
 	checkvol $vol
-	adjustvol $sink $delim 
+	adjustvol $sink $delim
+	signalvol=`pkill -RTMIN+10 i3blocks`
+
 else
 	getsinks
 	for sink in $sinks ; do
@@ -170,5 +179,6 @@ else
 		checkvol $vol
 		adjustvol $sink $delim
 	done
+	signalvol=`pkill -RTMIN+10 i3blocks`
 fi
 
