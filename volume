@@ -10,7 +10,6 @@ function adjustvol {
 	pactl set-sink-volume "$1" $2
 }
 
-signalvol=`pkill -RTMIN+10 i3blocks`
 
 function checkvol {
 	if [ $1 -gt $max ] ; then
@@ -33,9 +32,8 @@ function getcurrent {
 
 function getsinks {
 	sinks=`pactl list | grep RUNNING -B 1 | grep -oP 'Sink #\K([0-9]+)'`
-	allsinks=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
 	if [ -z $sinks ] ; then
-		sinks=$allsinks
+		sinks=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
 	fi
 	numsinks=`echo $sinks | wc -w`
 }
@@ -58,10 +56,12 @@ function setvol {
                 1)
                         pre="+"
                         vol=$(( $2 + $3 ))
+			signalvol=`pkill -RTMIN+10 i3blocks`
                         ;;
                 2)
                         pre="-"
                         vol=$(( $2 - $3 ))
+			signalvol=`pkill -RTMIN+10 i3blocks`
                         ;;
                 *)
                         echo "ERROR : setvol"
@@ -91,6 +91,8 @@ function switchsinks {
 	for input in $inputs ; do
 	  pacmd move-sink-input $input ${ALL[$newindex]}
 	done
+
+	signalvol=`pkill -RTMIN+10 i3blocks`
 }
 
 getsinks
@@ -100,6 +102,7 @@ if [ -z $1 ] ; then
 		getcurrent $sink
 		echo "Sink #$sink Volume=$current"
 	done
+
 	exit 0
 elif [ "$1" -eq "$1" ] 2>/dev/null ; then
        	for sink in $sinks ; do
