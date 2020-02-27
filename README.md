@@ -76,6 +76,7 @@ The script is tested with Dell 9560, Ubuntu 18.04 and i3wm.
 
 ## VOLUME
 This script detects and controls the sound on the active sink instead of "Master" or a given sink. 
+It also allows switching between sinks. It is tested and works for multiple USB outputs. Changing output within sink which allows switching between HDMI outputs, headphones, and computer speakers, is still missing. 
 
 The files needed are `volume` and `./config/cftconfig/volume/volume.conf`
 
@@ -90,6 +91,7 @@ Correct usage:  volume [OPTIONS]
 - To directly adjust volume:      volume <NUM> (1-100 or 1-LEVELS according to your configuration)
 - To mute:                        volume mute
 - To select sink:                 volume -s <sink> (Default: @DEFAULT_SINK@)
+- To switch output:               volume switchsinks
 - To display help:                volume -h or  --help
 
 
