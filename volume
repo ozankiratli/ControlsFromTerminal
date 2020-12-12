@@ -169,7 +169,7 @@ if [ $sinkflag -eq 1 ] ; then
 	setvol $OPER $current $step
 	checkvol $vol
 	adjustvol $sink $delim
-	signalvol=`pkill -RTMIN+10 i3blocks`
+	signalvol=`pkill -RTMIN+10 i3blocks & disown`
 
 else
 	getsinks
@@ -179,6 +179,6 @@ else
 		checkvol $vol
 		adjustvol $sink $delim
 	done
-	signalvol=`pkill -RTMIN+10 i3blocks`
+	signalvol=`pkill -RTMIN+10 i3blocks & disown`
 fi
 
