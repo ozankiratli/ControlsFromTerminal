@@ -1,0 +1,10 @@
+#!/bin/bash
+FONTSIZE=`echo "$1" | grep -E ^\-?[0-9]*\.?[0-9]+$ `
+
+if [ -n "$FONTSIZE" ] ; then
+  sed -i -r "s/(size: ).*/\1 $FONTSIZE/" .config/alacritty/alacritty.yml
+  echo "New Font Size in alacritty.yml is: $FONTSIZE "
+else
+  FONTSIZE=`grep size ~/.config/alacritty/alacritty.yml | awk '{print $2}'`
+  echo "Current Font Size in alacritty.yml is: $FONTSIZE "
+fi

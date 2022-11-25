@@ -1,0 +1,172 @@
+#!/bin/bash
+
+sinkFlag=0
+step=`grep "STEP" ~/.config/cftconf/volume.d/volume.conf | awk '{print $2}'`
+max=`grep "MAX" ~/.config/cftconf/volume.d/volume.conf | awk '{print $2}'`
+sName=`basename $0`
+
+function adjustVol {
+	pactl set-sink-volume "$1" $2
+}
+
+
+function checkVol {
+  	if [ $1 -gt $max ] ; then
+	        vol=$max
+	elif [ $1 -lt 0 ] ; then
+		vol=0
+	else
+		vol=$1
+	fi
+	delim="$vol%"
+}
+
+function getCurrent {
+	current=`pactl list | grep RUNNING -B 1 -A 10 | grep "Sink #$1" -A 10 | grep 'Sink\|Volume' | sed  -n -E 's/(^|.*[^0-9])([0-9]{1,3})%.*/\2/p'`
+	if [ -z $current ] ; then
+		current=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 -A 10 | grep "Sink #$1" -A 10 | grep 'Sink\|Volume' | sed  -n -E 's/(^|.*[^0-9])([0-9]{1,3})%.*/\2/p'`
+	fi
+	echo "getCurrent current: $current"
+}
+
+function getSinks {
+	sinks=`pactl list | grep RUNNING -B 1 | grep -oP 'Sink #\K([0-9]+)'`
+	if [ -z $sinks ] ; then
+		sinks=`pactl list | grep 'RUNNING\|SUSPENDED\|IDLE' -B 1 | grep -oP 'Sink #\K([0-9]+)'`
+	fi
+	numSinks=`echo $sinks | wc -w`
+	
+	echo "getSinks sinks: $sinks"
+}
+
+function help {
+	echo "Correct usage:  $sName [OPTIONS]" 
+	echo " "
+	echo "If you want to change the sink use '-s <sink>' before 'u' or 'd' "
+	echo "To increase volume:             $sName u"
+	echo "To decrease volume:             $sName d"
+	echo "To directly adjust volume:      $sName <NUM> (1-100 or 1-LEVELS according to your configuration)"
+	echo "To mute:                        $sName mute"
+	echo "To select sink:                 $sName -s <sink> (Default: @DEFAULT_SINK@)"
+	echo "To switch the output:           $sName switchsink"
+	echo "To display help:                $sName -h or $name --help"
+}
+
+function setVol {
+	case "$1" in
+                1)
+                        pre="+"
+                        vol=$(( $2 + $3 ))
+                        ;;
+                2)
+                        pre="-"
+                        vol=$(( $2 - $3 ))
+                        ;;
+                *)
+                        echo "ERROR : setvol"
+                        exit 0
+                        ;;
+        esac
+}
+
+function switchSinks {
+	allSinks=`pactl list sinks | grep -oP 'Sink #\K([0-9]+)'`
+	numAllSinks=`echo $allSinks | wc -w`
+	defaultSinkName=`pactl get-default-sink`
+	defaultSink=`pactl list sinks | grep -m 1 -B2 $defaultSinkName | grep -oP 'Sink #\K([0-9]+)'`
+	i=0
+	for snk in $allSinks ; do
+	  ALL[$i]=$snk
+	  (( i++ ))
+	done
+	for ((i=0; i<${#ALL[@]}; i++)) ; do
+	  if [ $defaultSink = ${ALL[$i]} ] ; then
+	    index=$i
+	  fi
+	done
+	newIndex=$(( $index + 1 ))
+	newIndex=$(( $newIndex % $numAllSinks ))
+        pactl set-default-sink ${ALL[$newIndex]}
+}
+
+
+if [ -z $1 ] ; then
+	getSinks
+	for sink in $sinks ; do
+		getCurrent $sink
+		echo "Sink #$sink Volume=$current"
+	done
+
+	exit 0
+elif [ "$1" -eq "$1" ] 2>/dev/null ; then
+	getSinks
+       	for sink in $sinks ; do
+		vol=$1
+		getCurrent $sink
+                checkVol $vol
+                adjustVol $sink $delim
+	done
+	exit 0
+elif [ "$1" == "mute" ] ; then
+	getSinks
+	for sink in $sinks ; do
+		com="toggle"
+       		pactl set-sink-mute "$sink" "$com"
+	done
+	exit 0
+elif [ "$1" == "switchsink" ] ; then
+        switchSinks
+	exit 0
+else
+	while test $# -gt 0; do
+	case "$1" in
+		-h|--help)
+			help
+			exit 0
+			;;
+		u|-u)
+			OPER=1
+			break
+			;;
+		d|-d)
+			OPER=2
+			break
+			;;
+		s|-s)
+			sinkFlag=1
+			shift
+			sink=$1
+			shift
+			getCurrent $sink
+			if [ -z $1 ] ; then
+				echo "Sink: $sink"
+				echo "Volume: $current"
+				exit 0
+			fi
+			;;
+		*)
+			help
+			exit 0
+			;;
+	esac
+	done
+fi
+
+
+if [ $sinkFlag -eq 1 ] ; then
+	getSinks
+	getCurrent $sink
+	setVol $OPER $current $step
+	checkVol $vol
+	adjustVol $sink $delim
+
+else
+	getSinks
+	for sink in $sinks ; do
+		getCurrent $sink
+		setVol $OPER $current $step
+		checkVol $vol
+		adjustVol $sink $delim
+	done
+fi
+
