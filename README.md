@@ -2,7 +2,7 @@
 This set of bash scripts allows one to control different interfaces through terminal. 
 
 There are 3 main scripts in this repository, `backlight` to control your laptop backlight, `volume` to control and limit your volume through `pulseaudio` (requires `pactl`), and `alacrittyResizeFont` an ultra short script to resize the font with a single command. 
-Also there are 2 legacy scripts for X11, `brightness` to control your brightness easily through `xrandr`, `monset` for setting up your monitors and keeping the settings with `xrandr. These legacy scripts will not be updated anymore. All of the files are coded in bash script, you need `awk`, `grep`, `wc`, and `bc` installed, almost all Linux systems have them installed as default.
+Also there are 2 legacy scripts for X11, `brightness` to control your brightness easily through `xrandr`, `monset` for setting up your monitors and keeping the settings with `xrandr`. These legacy scripts will not be updated anymore. All of the files are coded in bash script, you need `awk`, `grep`, `wc`, and `bc` installed, almost all Linux systems have them installed as default.
 
 ## INSTALLING
 1. Copy the cftconfig folder under `~/.config/`. 
