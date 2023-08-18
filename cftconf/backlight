@@ -16,12 +16,14 @@ MAX=`cat $PATHTOLIGHT/max_brightness`
 SNAME=`basename $0`
 
 INCR=$(( $STEP*$MAX/$NLEVELS ))
+INCR_DEFAULT=$(( $MAX/100 ))
 
 CURRENT_LEVEL=$(( $STEP*$CURRENT/$INCR ))
 
 NEW=$CURRENT
 
 function adjustbrightness {
+  	#echo $1
 	echo $1 > $PATHTOLIGHT/brightness
 	cat $PATHTOLIGHT/brightness > $LASTKNOWN
 	exit 0	
@@ -32,7 +34,7 @@ function help {
 	echo "This script takes only one option, second will be discarded"
 	echo "To increase backlight brightness:             $SNAME u"
 	echo "To decrease backlight brightness:             $SNAME d"
-	echo "To directly adjust backlight brightness:      $SNAME <NUM> (1-100 or 1-LEVELS according to your configuration)"
+	echo "To directly adjust backlight brightness:      $SNAME <NUM> (1-100)"
 	echo "To turn backlight off:                        $SNAME off"
 	echo "To display help                               $SNAME -h or $SNAME --help"
 }
@@ -46,14 +48,14 @@ if [ -z $1 ] ; then
 	echo "Brightness level (brightness controls) (Max=$NLEVELS):"
 	echo "$CURRENT_LEVEL"
 elif [ "$1" -eq "$1" ] 2>/dev/null ; then
-        if [ $1 -gt $NLEVELS ] ; then
+        if [ $1 -ge 100 ] ; then
                 NEW=$MAX
 		adjustbrightness $NEW
         elif [ $1 -lt 1 ] ; then
                 NEW=1
 		adjustbrightness $NEW
-	elif [ $1 -le $NLEVELS -o $1 -ge 1 ] ; then
-		NEW=$(( $1 * $INCRU ))
+	elif [ $1 -le 100 -o $1 -ge 1 ] ; then
+		NEW=$(( $1 * $INCR_DEFAULT ))
 		adjustbrightness $NEW
 	else
 		help
