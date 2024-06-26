@@ -119,3 +119,7 @@ At the moment, the monitors that are being used should be saved manually into th
 ### Setup file 
 I will add more details but for the time look at sample config files. 
 
+
+### Feature requests
+Feel free to submit feature requests.
+
