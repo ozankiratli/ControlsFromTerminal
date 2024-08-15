@@ -99,7 +99,7 @@ Find the input device identifier with `swaymsg -t get_inputs` and edit the scrip
  - To disable touchpad:           touchpad d 
 
 
-## Resize font in Alacritty 
+## CHANGE FONT SIZE IN ALACRITTY 
 Changes the font size in Alacritty. 
 
 ### Usage
@@ -152,4 +152,8 @@ At the moment, the monitors that are being used should be saved manually into th
 
 ### Setup file 
 I will add more details but for the time look at sample config files. 
+
+
+### Feature requests
+Feel free to submit feature requests.
 
