@@ -1,12 +1,13 @@
 # ControlsFromTerminal
 This set of bash scripts allows one to control different interfaces through terminal. 
 
-There are 3 main scripts in this repository, `backlight` to control your laptop backlight, `volume` to control and limit your volume through `pulseaudio` (requires `pactl`), and `alacrittyResizeFont` an ultra short script to resize the font with a single command. 
+There are 5 main scripts in this repository, `backlight` to control your laptop backlight, `volume` to control and limit your volume through `pulseaudio` (requires `pactl`), `keyboard` to enable/disable keyboard, `touchpad` to enable/disable touchpad, and `alacrittyResizeFont` an ultra short script to resize the font with a single command.
+
 Also there are 2 legacy scripts for X11, `brightness` to control your brightness easily through `xrandr`, `monset` for setting up your monitors and keeping the settings with `xrandr`. These legacy scripts will not be updated anymore. All of the files are coded in bash script, you need `awk`, `grep`, `wc`, and `bc` installed, almost all Linux systems have them installed as default.
 
 ## INSTALLING
 1. Copy the cftconfig folder under `~/.config/`. 
-2. Create a symbolic link to somewhere in your path. 
+2. Run `sudo ~/.config/cftconf/install-scripts.sh`. This script will create required symbolic links to `/usr/local/bin/`.
 
 
 ## BACKLIGHT
@@ -23,10 +24,13 @@ Example:
 ```
 chmod 666 /sys/class/backlight/intel_backlight/brightness
 ```
-***Important:*** The mode of the file above will turn back to normal, you can add the following line to `crontab` as root (`sudo crontab -e`).
+***Important:*** The mode of the file above will turn back to normal. There are two solutions for this.
+i) You can add the following line to `crontab` as root (`sudo crontab -e`).
 ```
 @reboot chmod 666 /sys/class/backlight/intel_backlight/brightness
 ```
+
+ii) If you choose to use systemd you can edit `startup.sh` to include the file to brightness and create a systemd service at boot. 
 
 2. Change the path to the `brightness` file that has the value of backlight level in `backlight.conf`.
 
@@ -43,7 +47,7 @@ backlight [OPTION]
 - To display help:                              `backlight -h | --help`
 
 
-### Notes to i3wm users having problems with hotkeys
+### Notes to swaywm users having problems with hotkeys
 After copying the files into `/usr/local/bin`
 
 Add the contents to your config file:
@@ -51,28 +55,6 @@ Add the contents to your config file:
 bindsym XF86MonBrightnessUp exec backlight u # increase screen brightness
 bindsym XF86MonBrightnessDown exec backlight d # decrease screen brightness
 ```
-
-## BRIGHTNESS
-
-The file `brightness` can be used to control the brightness of the screen. It changes `--brightness` setting of `xrandr`.
-
-### Before using 
-Copy the file, `brightness` wherever you want with `backlightconfig` and run.
-
-### Usage
-
-- To increase brightness:                       `bright -u`
-- To decrease brightness:                       `bright -d`
-- To set brightness to default value:           `bright -m`
-- To directly adjust backlight brightness:      `bright -n <NUM>` (0-2 in decimals, eg. 0.8)
-- To show connected displays:                   `bright -s`
-- To set display to be adjusted:                `bright -D <displayname>` 
-- To display help                               `bright -h or bright --help`
-
-Default display is primary display! You don't need to use -D flag if you want to change the brightness settings of primary display.
-
-
-The script is tested with Dell 9560, Ubuntu 18.04 and i3wm.
 
 ## VOLUME
 This script detects and controls the sound on the active sink instead of "Master" or a given sink. 
@@ -95,7 +77,59 @@ Correct usage:  volume [OPTIONS]
 - To display help:                volume -h or  --help
 
 
-## MONSET
+## KEYBOARD - _Under development. Currently only works with sway_ 
+This script enables and disables keyboard. 
+
+### Before using 
+Find the input device identifier with `swaymsg -t get_inputs` and edit the script to set `DEVICE`.
+
+### Usage
+ - To enable keyboard:            keyboard e
+ - To disable keyboard:           keyboard d 
+
+
+## TOUCHPAD - _Under development. Currently only works with sway_ 
+This script enables and disables touchpad. 
+
+### Before using 
+Find the input device identifier with `swaymsg -t get_inputs` and edit the script to set `DEVICE`.
+
+### Usage
+ - To enable touchpad:            touchpad e
+ - To disable touchpad:           touchpad d 
+
+
+## Resize font in Alacritty 
+Changes the font size in Alacritty. 
+
+### Usage
+ - To display current font size:  alacrittyResizeFont  
+ - To change font size:           alacrittyResizeFont <size>
+
+
+## BRIGHTNESS -- _X11 Legacy not developed anymore_
+The file `brightness` can be used to control the brightness of the screen. It changes `--brightness` setting of `xrandr`.
+
+### Before using 
+Copy the file, `brightness` wherever you want with `backlightconfig` and run.
+
+### Usage
+
+- To increase brightness:                       `bright -u`
+- To decrease brightness:                       `bright -d`
+- To set brightness to default value:           `bright -m`
+- To directly adjust backlight brightness:      `bright -n <NUM>` (0-2 in decimals, eg. 0.8)
+- To show connected displays:                   `bright -s`
+- To set display to be adjusted:                `bright -D <displayname>` 
+- To display help                               `bright -h or bright --help`
+
+Default display is primary display! You don't need to use -D flag if you want to change the brightness settings of primary display.
+
+
+The script is tested with Dell 9560, Ubuntu 18.04 and i3wm.
+
+
+## MONSET -- _X11 Legacy not developed anymore_
 This script is still under development, so it might still have bugs. Please read carefully before using. 
 
 It uses xrandr and is designed to use multiple monitor setups interchangably. 

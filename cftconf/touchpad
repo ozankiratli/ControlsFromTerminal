@@ -1,0 +1,23 @@
+#!/bin/bash
+
+
+ARGS=$@
+
+DEVICE="1739:31251:DLL07BE:01_06CB:7A13_Touchpad"
+
+case $ARGS in
+  e | E | en | enable | EN | ENABLE | Enable )
+    swaymsg input $DEVICE events enabled
+    echo "Laptop touchpad is enabled!"
+    exit
+    ;;
+  d | D | dis | DIS | disable | DISABLE | Disable )
+    swaymsg input $DEVICE events disabled
+    echo "Laptop touchpad is disabled!"
+    exit
+    ;;
+  * )
+    echo "Wrong input, use e to enable and d to disable."
+    exit
+    ;;
+esac
