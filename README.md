@@ -68,13 +68,13 @@ The files needed are `volume` and `./config/cftconfig/volume/volume.conf`
 Correct usage:  volume [OPTIONS]
  
 - If you want to change the sink use '-s <sink>' before 'u' or 'd' 
-- To increase volume:             volume u
-- To decrease volume:             volume d
-- To directly adjust volume:      volume <NUM> (1-100 or 1-LEVELS according to your configuration)
-- To mute:                        volume mute
-- To select sink:                 volume -s <sink> (Default: @DEFAULT_SINK@)
-- To switch output:               volume switchsinks
-- To display help:                volume -h or  --help
+- To increase volume:             `volume u`
+- To decrease volume:             `volume d`
+- To directly adjust volume:      `volume <NUM>` (1-100 or 1-LEVELS according to your configuration)
+- To mute:                        `volume mute`
+- To select sink:                 `volume -s <sink>` (Default: @DEFAULT_SINK@)
+- To switch output:               `volume switchsinks`
+- To display help:                `volume -h` or  `--help`
 
 
 ## KEYBOARD - _Under development. Currently only works with sway_ 
@@ -84,8 +84,8 @@ This script enables and disables keyboard.
 Find the input device identifier with `swaymsg -t get_inputs` and edit the script to set `DEVICE`.
 
 ### Usage
- - To enable keyboard:            keyboard e
- - To disable keyboard:           keyboard d 
+ - To enable keyboard:            `keyboard e`
+ - To disable keyboard:           `keyboard d` 
 
 
 ## TOUCHPAD - _Under development. Currently only works with sway_ 
@@ -95,16 +95,16 @@ This script enables and disables touchpad.
 Find the input device identifier with `swaymsg -t get_inputs` and edit the script to set `DEVICE`.
 
 ### Usage
- - To enable touchpad:            touchpad e
- - To disable touchpad:           touchpad d 
+ - To enable touchpad:            `touchpad e`
+ - To disable touchpad:           `touchpad d` 
 
 
 ## CHANGE FONT SIZE IN ALACRITTY 
 Changes the font size in Alacritty. 
 
 ### Usage
- - To display current font size:  alacrittyResizeFont  
- - To change font size:           alacrittyResizeFont <size>
+ - To display current font size:  `alacrittyResizeFont`  
+ - To change font size:           `alacrittyResizeFont <size>`
 
 
 ## BRIGHTNESS -- _X11 Legacy not developed anymore_
